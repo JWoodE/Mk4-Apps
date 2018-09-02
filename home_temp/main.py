@@ -26,40 +26,30 @@ while time.ticks_ms() < wait_until:
     if Buttons.is_pressed(Buttons.BTN_A) or Buttons.is_pressed(Buttons.BTN_B) or Buttons.is_pressed(Buttons.BTN_Menu):
         break
 
-def get_temp():
-    global value_wifi_strength, value_temp
+# Padding for name
+intro_height = 30
+intro_text = "Hi! I'm"
+name_height = 60
+status_height = 20
+info_height = 30
+logo_path = "shared/logo.png"
+logo_height = 150
+logo_width = 56
 
-    if not wifi.is_connected():
-        try:
-            wifi.connect(show_wait_message=True)
-        except:
+# Maximum length of name before downscaling
+max_name = 8
 
-    if wifi.is_connected():
-        value_wifi_strength = wifi_strength()
-        value_temp = http.get("http://ipswichmakerspace.mooo.com/temp.txt").raise_for_status().content
+# Colour stuff
+style = ugfx.Style()
+style.set_enabled([ugfx.WHITE, ugfx.html_color(0x800080), ugfx.html_color(0x800080), ugfx.html_color(0x800080)])
+style.set_background(ugfx.html_color(0x800080))
+ugfx.set_default_style(style)
 
 def paint_screen():
-    # Padding for name
-    intro_height = 30
-    intro_text = "Hi! I'm"
-    name_height = 60
-    status_height = 20
-    info_height = 30
-    logo_path = "shared/logo.png"
-    logo_height = 150
-    logo_width = 56
-
-    # Maximum length of name before downscaling
-    max_name = 8
+    global status
 
     # Background stuff
     ugfx.clear(ugfx.html_color(0x800080))
-
-    # Colour stuff
-    style = ugfx.Style()
-    style.set_enabled([ugfx.WHITE, ugfx.html_color(0x800080), ugfx.html_color(0x800080), ugfx.html_color(0x800080)])
-    style.set_background(ugfx.html_color(0x800080))
-    ugfx.set_default_style(style)
 
     # Logo stuff
     ugfx.display_image(
@@ -95,10 +85,19 @@ def paint_screen():
 
     Buttons.enable_interrupt(Buttons.BTN_B, lambda button_id:get_temp(), on_press=True, on_release=False)
 
+def get_temp():
+    global value_wifi_strength, value_temp
+
+    if not wifi.is_connected():
+        wifi.connect(show_wait_message=True)
+    paint_screen()
+    if wifi.is_connected():
+        value_wifi_strength = wifi_strength()
+        value_temp = http.get("http://ipswichmakerspace.mooo.com/temp.txt").raise_for_status().content
+
 value_wifi_strength = 0
 value_temp = 0.00
 get_temp()
-paint_screen()
 
 # update loop
 while True:
