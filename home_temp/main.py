@@ -26,7 +26,18 @@ while time.ticks_ms() < wait_until:
     if Buttons.is_pressed(Buttons.BTN_A) or Buttons.is_pressed(Buttons.BTN_B) or Buttons.is_pressed(Buttons.BTN_Menu):
         break
 
-wifi.connect(show_wait_message=True)
+def get_temp():
+    global value_wifi_strength, value_temp
+
+    if not wifi.is_connected():
+        wifi.connect(show_wait_message=True)
+    if wifi.is_connected():
+        value_wifi_strength = wifi_strength()
+        value_temp = http.get("http://ipswichmakerspace.mooo.com/temp.txt").raise_for_status().content
+
+value_wifi_strength = 0
+value_temp = 0.00
+get_temp()
 
 # Padding for name
 intro_height = 30
@@ -87,26 +98,17 @@ ugfx.Label(0, ugfx.height() - info_height, ugfx.width(), info_height, "Long Pres
 ugfx.set_default_font(ugfx.FONT_SMALL)
 status = ugfx.Label(0, ugfx.height() - info_height * 2 - status_height, ugfx.width(), status_height, "", justification=ugfx.Label.CENTER)
 
-count = 0
-value_temp = http.get("http://ipswichmakerspace.mooo.com/temp.txt").raise_for_status().content
-value_wifi_strength = wifi_strength()
-sleep.wfi()
+Buttons.enable_interrupt(Buttons.BTN_B, lambda button_id:get_temp(), on_press=True, on_release=False)
 
 # update loop
 while True:
     text = "";
     value_battery = battery()
-    if count > 58:
-        value_temp = http.get("http://ipswichmakerspace.mooo.com/temp.txt").raise_for_status().content
-        value_wifi_strength = wifi_strength()
-        sleep.wfi()
-        count = 0
     if value_wifi_strength:
         text += "W: %s%%, " % int(value_wifi_strength)
     if value_battery:
         text += "B: %s%%, " % int(value_battery)
     if value_temp:
         text += '{} {:.7}'.format("T: ", value_temp)
-    count += 1
     status.text(text)
     sleep_or_exit(0.5)
