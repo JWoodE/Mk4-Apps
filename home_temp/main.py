@@ -89,12 +89,19 @@ def get_temp():
     global value_wifi_strength, value_temp
 
     if not wifi.is_connected():
-        wifi.connect(show_wait_message=True)
-    paint_screen()
+        try:
+            wifi.connect(show_wait_message=True)
+            paint_screen()
+        except:
+            paint_screen()
     if wifi.is_connected():
-        value_wifi_strength = wifi_strength()
-        value_temp = http.get("http://ipswichmakerspace.mooo.com/temp.txt").raise_for_status().content
+        try:
+            value_wifi_strength = wifi_strength()
+            value_temp = http.get("http://ipswichmakerspace.mooo.com/temp.txt").raise_for_status().content
+        except:
+            paint_screen()
 
+count = 1
 value_wifi_strength = 0
 value_temp = 0.00
 get_temp()
@@ -103,6 +110,9 @@ get_temp()
 while True:
     text = "";
     value_battery = battery()
+    if count >= 600:
+        get_temp()
+        count = 1
     if value_wifi_strength:
         text += "W: %s%%, " % int(value_wifi_strength)
     if value_battery:
@@ -110,4 +120,5 @@ while True:
     if value_temp:
         text += '{} {:.7}'.format("T: ", value_temp)
     status.text(text)
+    count += 1
     sleep_or_exit(0.5)
