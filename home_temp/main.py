@@ -8,8 +8,6 @@ ___name___         = "Homescreen (Temp)"
 ___license___      = "MIT"
 ___categories___   = ["Homescreens"]
 ___dependencies___ = ["homescreen", "shared/logo.png", "shared/sponsors.png", "wifi", "http", "sleep"]
-___launchable___   = False
-___bootstrapped___ = False
 
 import ugfx
 from homescreen import *
